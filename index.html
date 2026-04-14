@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Gestión de Usuarios</title>
+    <style>
+        body { font-family: Arial; margin: 40px; }
+        input { margin: 5px; }
+        table { border-collapse: collapse; margin-top: 20px; }
+        th, td { border: 1px solid #ccc; padding: 8px; }
+        button { cursor: pointer; }
+    </style>
+</head>
+<body>
+
+<h2>Crear Usuario</h2>
+
+<input type="text" id="nombre" placeholder="Nombre">
+<input type="email" id="correo" placeholder="Correo">
+<input type="text" id="telefono" placeholder="Teléfono">
+<button onclick="crearUsuario()">Crear</button>
+
+<h2>Lista de Usuarios</h2>
+
+<table>
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Nombre</th>
+            <th>Correo</th>
+            <th>Teléfono</th>
+            <th>Acción</th>
+        </tr>
+    </thead>
+    <tbody id="tablaUsuarios"></tbody>
+</table>
+
+<script>
+
+const API_URL = "api_usuarios.php";
+
+async function cargarUsuarios() {
+    const response = await fetch(API_URL);
+    const usuarios = await response.json();
+
+    const tabla = document.getElementById("tablaUsuarios");
+    tabla.innerHTML = "";
+
+    usuarios.forEach(usuario => {
+        tabla.innerHTML += `
+            <tr>
+                <td>${usuario.id}</td>
+                <td>${usuario.nombre}</td>
+                <td>${usuario.correo}</td>
+                <td>${usuario.telefono}</td>
+                <td>
+                    <button onclick="eliminarUsuario(${usuario.id})">
+                        Eliminar
+                    </button>
+                </td>
+            </tr>
+        `;
+    });
+}
+
+async function crearUsuario() {
+
+    const nombre = document.getElementById("nombre").value;
+    const correo = document.getElementById("correo").value;
+    const telefono = document.getElementById("telefono").value;
+
+    await fetch(API_URL, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ nombre, correo, telefono })
+    });
+
+    document.getElementById("nombre").value = "";
+    document.getElementById("correo").value = "";
+    document.getElementById("telefono").value = "";
+
+    cargarUsuarios();
+}
+
+async function eliminarUsuario(id) {
+
+    await fetch(`${API_URL}?id=${id}`, {
+        method: "DELETE"
+    });
+
+    cargarUsuarios();
+}
+
+cargarUsuarios();
+
+</script>
+
+</body>
+</html>
